@@ -1,0 +1,192 @@
+<html>
+<head>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+
+<meta charset="UTF-8"/>
+<title>YAZMEK GAME</title>
+</head>
+<body>
+
+<div ng-app="myApp" ng-controller="cntrl" align="center">
+<form>
+	<table>
+		<tr>
+			<td class="fluid visible">
+	<table>
+		<tr>
+			<td class="fluid visible">
+				Player ID:
+			</td>
+			<td class="fluid visible">
+				<input type="text" ng-model="id" name="id" ng-disabled="obj.idisable">
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+				Player Name:
+			</td>
+			<td class="fluid visible">
+				 <input type="text" ng-model="name" name="id" ng-disabled="obj.idisable">
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+				Health:
+			</td>
+			<td class="fluid visible">
+				 <input type="text" ng-model="health" name="hlt" readonly>
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+
+			</td>
+			<td class="fluid visible">
+				<input type="button" value="{{btnName}}" ng-click="insertdata()">
+				<input type="button" value="LIST" ng-click="displayStud()">
+				<input type="button" value="FIGHT!" ng-click="fightcalculate(fid,fhealth)" >
+
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+				{{msg}}
+			</td>
+		</tr>
+	</table>
+</td>
+<td class="fluid visible">
+	<table>
+		<tr>
+			<td class="fluid visible">
+			</td>
+			<td class="fluid visible">
+			</td>
+			<td class="fluid visible">
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+				Fight To:
+			</td>
+			<td class="fluid visible">
+				<input type="text" ng-model="fid" name="fid" ng-disabled="obj.idisable" placeholder="id">
+				<input type="text" ng-model="fname" name="fname" ng-disabled="obj.idisable" placeholder="kullanıcı adı">
+				<input type="text" ng-model="fhealth" name="fhealth" ng-disabled="obj.idisable" placeholder="sağlık">
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+			</td>
+			<td class="fluid visible">
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+
+			</td>
+			<td class="fluid visible">
+
+			</td>
+		</tr>
+		<tr>
+			<td class="fluid visible">
+			</td>
+		</tr>
+	</table>
+</td>
+</tr>
+</table>
+
+</form>
+<table>
+	<thead>
+		<tr>
+			<th class="fluid visible">ID</th>
+			<th class="fluid visible">Name</th>
+			<th class="fluid visible">Health</th>
+
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="student in data">
+				<td class="fluid visible">{{student.studid}}</td>
+				<td class="fluid visible">{{student.studname}}</td>
+				<td class="fluid visible">{{student.health}}</td>
+				<td class="fluid visible"><button ng-click="deleteStud(student.studid);">Delete</button></td>
+				<td class="fluid visible"><button ng-click="editStud(student.studid, student.studname, student.health);">SELECT PLAYER</button></td>
+				<td class="fluid visible"><button ng-click="selectFightPlayer(student.studid, student.studname,student.health);">FIGHT TO</button></td>
+
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<script>
+var app=angular.module('myApp',[]);
+app.controller('cntrl', function($scope,$http){
+	$scope.obj={'idisable':false};
+	$scope.btnName="Insert";
+
+	$scope.insertdata=function(){
+		$http.post("insert.php",{'id':$scope.id, 'name':$scope.name, 'btnName':$scope.btnName})
+		.success(function(){
+			$scope.msg="Data Inserted";
+			//$scope.displayStud();
+		})
+	}
+	$scope.fightcalculate=function(stuuid,stuhlth)
+	{
+		//alert(stuuid +" Nolu id ye sahip sağlığı  şu : " +stuhlth  );
+		stuhlth = stuhlth -(Math.floor(Math.random() * 10) +1);
+		$http.post("health.php",{'id':stuuid, 'health':stuhlth})
+		.success(function(){
+			//alert("DAMAGED!");
+			if(window.confirm("DAMAGED" + stuhlth))
+			window.location.href = "http://localhost/yazmekgame/main.html"
+		})
+		//take victim players health
+		//calculate to damage and effect to victim player
+		//victims updated health send to health.php and save new health info.
+	}
+
+	$scope.displayStud=function(){
+		$http.get("select.php")
+		.success(function(data){
+			$scope.data=data
+		})
+		
+	}
+	$scope.deleteStud=function(studid){
+		$http.post("delete.php",{'id':studid})
+		.success(function(){
+				$scope.msg="Data Deletion successfull";
+				//$scope.displayStud();
+		})
+	}
+
+$scope.selectFightPlayer=function(studid,studname,studhealth)
+{
+	$scope.fid=studid;
+	$scope.fname=studname;
+	$scope.fhealth =studhealth;
+		$scope.obj.idisable=true;
+		alert("Saldıracağınız oyuncu: " + studname);
+}
+	$scope.editStud=function(studid, studname, health)
+	{
+		$scope.id=studid;
+		$scope.name=studname;
+		$scope.health=health;
+		$scope.btnName="Update";
+		$scope.obj.idisable=true;
+		alert("Seçtiğiniz oyuncu: " + $scope.name);
+		//$scope.displayStud();
+	}
+});
+
+
+</script>
+</body>
+
+</html>
